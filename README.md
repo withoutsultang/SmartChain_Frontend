@@ -8,6 +8,14 @@
 
 협력사의 증빙 제출부터 검토·승인·보완 요청까지 연결하는 **AI 기반 공급망 리스크 관리 플랫폼**입니다. ESG·안전보건·하도급 컴플라이언스의 세 업무 영역을 하나의 제출·검토 흐름으로 구성했습니다.
 
+## 실제 서비스 시연
+
+![기안 생성부터 AI 분석·결재·심사까지 실제 화면 시연](docs/demo/smartchain-demo.gif)
+
+**기안 생성 → 증빙 9개 업로드·분류 → 실제 AI 분석 → 회사 결재 → 원청 심사·보완 요청 → 최종 승인**을 연결했습니다. 합성 문서로 실제 서비스를 실행해 캡처한 15.4초 시연입니다.
+
+[화면 7개 보기](https://github.com/withoutsultang/SmartChain_Frontend/tree/develop/docs/demo) · [실행 결과와 검증 근거](https://github.com/withoutsultang/SmartChain_AI/blob/main/docs/verification.md)
+
 ## 김건우의 주요 기여
 
 **화면 구현과 API 계약을 함께 다루며**, 사용자가 다음 업무 단계로 이동할 수 있도록 제출·검토·복구 동선을 정리했습니다.
@@ -46,19 +54,19 @@ Node.js 22 이상을 권장합니다. 기본 백엔드 주소는 API client와 V
 ```bash
 npm install
 # .env.local
-# VITE_API_BASE_URL=http://localhost:8080/api
+# VITE_API_BASE_URL=/api
+# VITE_RECAPTCHA_SITE_KEY=
 npm run dev
 npm run build
 npm run test:preview
-# 역할별 브라우저 시험
-npx playwright test --project=chromium
+npm run test:auth
 ```
 
 ## 코드 탐색
 
 `features/`는 업무별 화면, `src/api/`는 서버 계약, `src/hooks/`는 서버 상태, `src/store/`는 인증 상태, `tests/`는 POM/화면 흐름 시험을 담습니다. Preview 대기·복구 정책은 `src/api/previewPolicy.ts`에서 관리합니다.
 
-검증 자동화는 **Actions → Portfolio checks → Run workflow**에서 실행할 수 있습니다.
+빌드·회귀 시험은 **Actions → Portfolio checks → Run workflow**, 실제 API·DB·브라우저 통합 검증은 [AI 저장소의 Live portfolio integration](https://github.com/withoutsultang/SmartChain_AI/actions/workflows/live-integration.yml)에서 실행합니다.
 
 ## 프로젝트 저장소
 
