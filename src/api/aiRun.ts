@@ -1,4 +1,5 @@
 import { apiClient } from './client';
+import { PREVIEW_TIMEOUT_MS } from './previewPolicy';
 import type { BaseResponse } from '../types/api.types';
 
 export interface SlotStatus {
@@ -111,7 +112,7 @@ export const previewAiRun = async (
       ...(removedFileIds?.length ? { removedFileIds } : {}),
       ...(packageId ? { packageId } : {}),
     },
-    { timeout: 35000 }
+    { timeout: PREVIEW_TIMEOUT_MS }
   );
   return response.data.data;
 };
@@ -143,3 +144,4 @@ export const getAiHistory = async (diagnosticId: number): Promise<AiAnalysisResu
   );
   return response.data.data;
 };
+

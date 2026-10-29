@@ -12,11 +12,10 @@ import {
   useAiResult,
 } from '../../src/hooks/useAiRun';
 import * as filesApi from '../../src/api/files';
-import type { AxiosError } from 'axios';
+import { isPreviewRetryableError } from '../../src/api/previewPolicy';
 import type { JobStatus } from '../../src/api/jobs';
 import { previewAiRun } from '../../src/api/aiRun';
 import type { SlotStatus, SlotHint, RunPreviewResponse } from '../../src/api/aiRun';
-import type { ErrorResponse } from '../../src/types/api.types';
 import DashboardLayout from '../../shared/layout/DashboardLayout';
 
 // 파일 업로드 상태 타입
@@ -1196,13 +1195,13 @@ export default function DiagnosticFilesPage() {
 
                 {/* AI001 에러 시 다시 시도 UI */}
                 {previewMutation.isError &&
-                  (previewMutation.error as AxiosError<ErrorResponse>)?.response?.data?.code === 'AI001' && (
+                  isPreviewRetryableError(previewMutation.error) && (
                   <div className="flex items-center gap-[12px] px-[16px] py-[12px] bg-red-50 rounded-[10px] border border-red-200">
                     <svg className="w-[18px] h-[18px] text-red-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                     </svg>
                     <p className="flex-1 font-body-small text-red-700">
-                      AI 서비스에 연결할 수 없습니다. 잠시 후 다시 시도해 주세요.
+                      AI 응답이 지연되거나 연결할 수 없습니다. 잠시 후 다시 시도해 주세요.
                     </p>
                     <button
                       onClick={() => callPreview(allCompletedFileIds)}
@@ -1362,3 +1361,4 @@ export default function DiagnosticFilesPage() {
     </DashboardLayout>
   );
 }
+
