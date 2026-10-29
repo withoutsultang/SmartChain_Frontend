@@ -1,5 +1,7 @@
 # SmartChain Frontend
 
+[![Portfolio checks](https://github.com/withoutsultang/SmartChain_Frontend/actions/workflows/portfolio-checks.yml/badge.svg?branch=develop)](https://github.com/withoutsultang/SmartChain_Frontend/actions/workflows/portfolio-checks.yml)
+
 > 파일 제출·AI 결과·결재·수신 검토를 역할별 사용자 흐름으로 연결하는 React 애플리케이션
 
 **KT AIVLE School 빅프로젝트 · 7인 팀 · 최우수상(2위)**
