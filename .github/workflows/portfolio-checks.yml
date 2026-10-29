@@ -1,13 +1,26 @@
 name: Portfolio checks
-on: workflow_dispatch
+on:
+  workflow_dispatch:
+  push:
+    branches: [develop]
 permissions:
   contents: read
 jobs:
-  preview-policy:
+  frontend:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - run: npm run test:preview
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+      - name: Preview recovery regression
+        run: npm run test:preview
+      - name: Production build
+        run: npm run build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: frontend-dist
+          path: dist/
