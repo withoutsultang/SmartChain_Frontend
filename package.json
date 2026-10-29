@@ -8,7 +8,8 @@
     "build": "vite build",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
-    "test:preview": "node --experimental-strip-types --test tests/preview-policy.test.mjs"
+    "test:preview": "node --experimental-strip-types --test tests/preview-policy.test.mjs",
+    "test:auth": "node --experimental-strip-types --test tests/login-security.test.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

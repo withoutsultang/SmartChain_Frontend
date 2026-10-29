@@ -1,4 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
+import { toast } from 'sonner';
+import { canSkipRecaptcha } from '../../src/api/loginSecurity';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { GoogleReCaptchaProvider, useGoogleReCaptcha } from 'react-google-recaptcha-v3';
@@ -169,13 +171,20 @@ function LoginForm() {
   const isAccountLocked = lockState?.isLocked && !lockState.isPermanent && remainingSeconds > 0;
 
   const onSubmit = useCallback(async (data: LoginFormData) => {
-    if (!executeRecaptcha) {
-      console.error('reCAPTCHA not loaded');
+    if (canSkipRecaptcha(import.meta.env.DEV, import.meta.env.VITE_RECAPTCHA_SITE_KEY)) {
+      loginMutation.mutate({ ...data, recaptchaToken: '' });
       return;
     }
-
-    const recaptchaToken = await executeRecaptcha('login');
-    loginMutation.mutate({ ...data, recaptchaToken });
+    if (!executeRecaptcha) {
+      toast.error('로그인 보안 확인을 사용할 수 없습니다. 잠시 후 다시 시도해주세요.');
+      return;
+    }
+    try {
+      const recaptchaToken = await executeRecaptcha('login');
+      loginMutation.mutate({ ...data, recaptchaToken });
+    } catch {
+      toast.error('로그인 보안 확인에 실패했습니다. 다시 시도해주세요.');
+    }
   }, [executeRecaptcha, loginMutation]);
 
   const handleSignup = useCallback(() => {
@@ -301,6 +310,7 @@ function LoginForm() {
 }
 
 export default function LoginPage() {
+  if (!import.meta.env.VITE_RECAPTCHA_SITE_KEY?.trim()) return <LoginForm />;
   return (
     <GoogleReCaptchaProvider
       reCaptchaKey={import.meta.env.VITE_RECAPTCHA_SITE_KEY}

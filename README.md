@@ -39,6 +39,8 @@ React 18 · TypeScript · Vite · React Query · Zustand · React Hook Form/Zod 
 
 ## 로컬 실행
 
+개발 서버는 `VITE_RECAPTCHA_SITE_KEY`가 없을 때 백엔드의 로컬 CAPTCHA 비활성화 설정으로 로그인할 수 있습니다. 키가 설정된 개발 환경과 프로덕션 빌드에서는 CAPTCHA 검증을 유지합니다.
+
 Node.js 22 이상을 권장합니다. 기본 백엔드 주소는 API client와 Vite 설정을 참고하세요.
 
 ```bash
