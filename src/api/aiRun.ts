@@ -1,5 +1,7 @@
 import { apiClient } from './client';
 import { PREVIEW_TIMEOUT_MS } from './previewPolicy';
+import type { RunState } from './analysisPolicy';
+export interface AiRunState extends RunState { diagnosticId: number; duplicate: boolean; }
 import type { BaseResponse } from '../types/api.types';
 
 export interface SlotStatus {
@@ -120,8 +122,14 @@ export const previewAiRun = async (
 export const submitAiRun = async (
   diagnosticId: number,
   slotHints: SlotHint[]
-): Promise<void> => {
-  await apiClient.post(`/v1/ai/run/diagnostics/${diagnosticId}/submit`, { slotHints });
+): Promise<AiRunState> => {
+  const response = await apiClient.post<BaseResponse<AiRunState>>(`/v1/ai/run/diagnostics/${diagnosticId}/submit`, { slotHints });
+  return response.data.data;
+};
+
+export const getAiRunStatus = async (diagnosticId: number): Promise<AiRunState> => {
+  const response = await apiClient.get<BaseResponse<AiRunState>>(`/v1/ai/run/diagnostics/${diagnosticId}/status`);
+  return response.data.data;
 };
 
 export const getAiResult = async (diagnosticId: number): Promise<AiAnalysisResultResponse> => {

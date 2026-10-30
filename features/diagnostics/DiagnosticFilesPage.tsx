@@ -9,10 +9,11 @@ import { QUERY_KEYS } from '../../src/constants/queryKeys';
 import {
   useAiPreview,
   useSubmitAiRun,
-  useAiResult,
+  useAiRunStatus,
 } from '../../src/hooks/useAiRun';
 import * as filesApi from '../../src/api/files';
 import { isPreviewRetryableError } from '../../src/api/previewPolicy';
+import { analysisOutcome } from '../../src/api/analysisPolicy';
 import type { JobStatus } from '../../src/api/jobs';
 import { previewAiRun } from '../../src/api/aiRun';
 import type { SlotStatus, SlotHint, RunPreviewResponse } from '../../src/api/aiRun';
@@ -430,7 +431,7 @@ export default function DiagnosticFilesPage() {
   const previewMutation = useAiPreview();
   const submitMutation = useSubmitAiRun();
   // 분석 중일 때만 polling (평소에는 1회만 호출)
-  const { data: aiResult } = useAiResult(diagnosticId, isAnalyzing);
+
   const [showSubmitModal, setShowSubmitModal] = useState(false);
   const abortControllerRef = useRef<AbortController | null>(null);
   // 초기 preview 데이터 (직접 API 호출 결과)
@@ -439,7 +440,14 @@ export default function DiagnosticFilesPage() {
   // preview 응답에서 받은 package_id를 다음 호출에 재사용
   const packageIdRef = useRef<string | null>(null);
   // 재분석 시 이전 결과 ID 저장
-  const prevResultIdRef = useRef<number | null>(null);
+  const [activeRequestId, setActiveRequestId] = useState<string | null>(null);
+  const { data: runState, error: runStatusError } = useAiRunStatus(diagnosticId, isAnalyzing);
+  useEffect(() => {
+    if (runState && (runState.status === 'PENDING' || runState.status === 'RUNNING')) {
+      setActiveRequestId(runState.requestId);
+      setIsAnalyzing(true);
+    }
+  }, [runState]);
 
   // 모든 업로드된 파일 표시
   // 새로 업로드한 파일 상태를 우선 사용 (job polling 결과 반영)
@@ -549,19 +557,26 @@ export default function DiagnosticFilesPage() {
     }
   }, [diagnosticId, existingFiles]);
 
-  // 분석 완료 감지 → 기안 상세 페이지로 리다이렉트
-  // 이전 결과 ID와 동일하면 아직 새 결과가 아님
+  // Follow the accepted request; never treat an older stored result as this attempt's success.
   useEffect(() => {
-    if (isAnalyzing && aiResult) {
-      // 이전 결과와 같은 ID면 skip (아직 새 결과 아님)
-      if (prevResultIdRef.current !== null && aiResult.id === prevResultIdRef.current) {
-        return;
-      }
+    if (!isAnalyzing) return;
+    const outcome = analysisOutcome(activeRequestId, runState);
+    if (outcome === 'failed') {
       setIsAnalyzing(false);
-      prevResultIdRef.current = null;
+      toast.error('AI 분석을 완료하지 못했습니다. 파일을 확인한 뒤 다시 분석해주세요.');
+    } else if (outcome === 'completed') {
+      setIsAnalyzing(false);
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.AI_RUN.RESULT(diagnosticId) });
       navigate(`/diagnostics/${diagnosticId}`);
     }
-  }, [aiResult, isAnalyzing, navigate, diagnosticId]);
+  }, [runState, isAnalyzing, activeRequestId, diagnosticId, navigate, queryClient]);
+
+  useEffect(() => {
+    if (isAnalyzing && runStatusError) {
+      setIsAnalyzing(false);
+      toast.error('분석 상태를 확인하지 못했습니다. 다시 시도하면 진행 중인 요청을 이어서 확인합니다.');
+    }
+  }, [isAnalyzing, runStatusError]);
 
   // Job polling for files in processing state
   const processingFile = newlyUploadedFiles.find(f => f.uploadStatus === 'processing');
@@ -836,7 +851,7 @@ export default function DiagnosticFilesPage() {
   const handleSubmitAiRun = () => {
     setShowSubmitModal(false);
     // 이전 결과 ID 저장하여 polling에서 이전 결과 필터링
-    prevResultIdRef.current = aiResult?.id ?? null;
+    setActiveRequestId(null);
     queryClient.removeQueries({ queryKey: QUERY_KEYS.AI_RUN.RESULT(diagnosticId) });
     setIsAnalyzing(true);
     const slotHints = (previewData?.slot_hint || []).map(h => ({
@@ -845,6 +860,10 @@ export default function DiagnosticFilesPage() {
       display_name: h.display_name,
     }));
     submitMutation.mutate({ diagnosticId, slotHints }, {
+      onSuccess: (accepted) => {
+        setActiveRequestId(accepted.requestId);
+        queryClient.setQueryData(QUERY_KEYS.AI_RUN.STATUS(diagnosticId), accepted);
+      },
       onError: () => {
         setIsAnalyzing(false);
       },

@@ -9,7 +9,8 @@
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "test:preview": "node --experimental-strip-types --test tests/preview-policy.test.mjs",
-    "test:auth": "node --experimental-strip-types --test tests/login-security.test.mjs"
+    "test:auth": "node --experimental-strip-types --test tests/login-security.test.mjs",
+    "test:analysis": "node --experimental-strip-types --test tests/analysis-policy.test.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

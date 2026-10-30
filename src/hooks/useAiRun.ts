@@ -22,7 +22,7 @@ export const useSubmitAiRun = () => {
     mutationFn: ({ diagnosticId, slotHints }: { diagnosticId: number; slotHints: aiRunApi.SlotHint[] }) =>
       aiRunApi.submitAiRun(diagnosticId, slotHints),
     onSuccess: (_, { diagnosticId }) => {
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.AI_RUN.RESULT(diagnosticId) });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.AI_RUN.STATUS(diagnosticId) });
     },
     onError: (error: AxiosError<ErrorResponse>) => {
       handleApiError(error);
@@ -55,3 +55,11 @@ export const useAiHistory = (diagnosticId: number) => {
     enabled: diagnosticId > 0,
   });
 };
+
+export const useAiRunStatus = (diagnosticId: number, polling = false) => useQuery({
+  queryKey: QUERY_KEYS.AI_RUN.STATUS(diagnosticId),
+  queryFn: () => aiRunApi.getAiRunStatus(diagnosticId),
+  enabled: diagnosticId > 0,
+  refetchInterval: polling ? 1500 : false,
+  retry: false,
+});

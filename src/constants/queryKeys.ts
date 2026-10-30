@@ -32,6 +32,7 @@ export const QUERY_KEYS = {
     LIST: (params?: object) => ['notifications', 'list', params] as const,
   },
   AI_RUN: {
+    STATUS: (diagnosticId: number) => ['aiRun', 'status', diagnosticId] as const,
     RESULT: (diagnosticId: number) => ['aiRun', 'result', diagnosticId] as const,
     RESULT_DETAIL: (diagnosticId: number) => ['aiRun', 'resultDetail', diagnosticId] as const,
     HISTORY: (diagnosticId: number) => ['aiRun', 'history', diagnosticId] as const,
