@@ -12,9 +12,9 @@
 
 ![기안 생성부터 AI 분석·결재·심사까지 실제 화면 시연](docs/demo/smartchain-demo.gif)
 
-**기안 생성 → 증빙 9개 업로드·분류 → 실제 AI 분석 → 회사 결재 → 원청 심사·보완 요청 → 최종 승인**을 연결했습니다. 합성 문서로 실제 서비스를 실행해 캡처한 15.4초 시연입니다.
+**기안 생성 → 증빙 9개 업로드·분류 → 실제 AI 분석 → 회사 결재 → 원청 보완 요청 → 증빙 수정·재분석·재제출 → 최종 승인**을 연결했습니다. 합성 문서로 실제 서비스를 실행해 캡처한 22초 시연입니다.
 
-[화면 7개 보기](https://github.com/withoutsultang/SmartChain_Frontend/tree/develop/docs/demo) · [실행 결과와 검증 근거](https://github.com/withoutsultang/SmartChain_AI/blob/main/docs/verification.md)
+[화면 10개 보기](https://github.com/withoutsultang/SmartChain_Frontend/tree/develop/docs/demo) · [실행 결과와 검증 근거](https://github.com/withoutsultang/SmartChain_AI/blob/main/docs/verification.md)
 
 ## 김건우의 주요 기여
 
@@ -33,6 +33,12 @@
 ## 서비스 화면
 
 ![안전보건 심사 관리 화면](docs/스크린샷%202026-02-06%2010.58.16.png)
+
+## 분석 실패 후 이어서 진행
+
+서버가 발급한 분석 요청 ID로 완료·실패를 확인합니다. 이전 분석 결과를 새 요청의 완료로 오인하지 않고, 실패 시 다시 분석할 수 있게 대기를 종료합니다. 화면에 다시 들어오면 진행 중인 요청을 이어서 확인하며, 같은 기안의 분석 요청은 서버에서 중복 실행을 막습니다.
+
+Preview·로그인·분석 복구 정책 **9개 회귀 시험**과 프로덕션 빌드를 통과했습니다. [통합 검증 근거](https://github.com/withoutsultang/SmartChain_Backend/blob/dev/docs/workflow-recovery-verification.md)
 
 ## 사용자 경험 설계
 
@@ -60,6 +66,7 @@ npm run dev
 npm run build
 npm run test:preview
 npm run test:auth
+npm run test:analysis
 ```
 
 ## 코드 탐색
